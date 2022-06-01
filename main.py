@@ -25,19 +25,30 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
+# Creating Post Model
+class Posts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text())
+    date_posted = db.Column(db.DateTime, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+
 # Creating User Model
 class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=True)
-    username = db.Column(db.String(50), nullable=True, unique=True)
-    email = db.Column(db.String(200), nullable=True, unique=True)
-    password_hash = db.Column(db.String(128), nullable=True)
+    name = db.Column(db.String(200), nullable=False)
+    username = db.Column(db.String(50), nullable=False, unique=True)
+    email = db.Column(db.String(200), nullable=False, unique=True)
+    password_hash = db.Column(db.String(128), nullable=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
+    posts = db.relationship('Posts', backref='poster')
 
     @property
     def password(self):
@@ -50,9 +61,12 @@ class Users(db.Model, UserMixin):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
 #     Creating a String
 def __repr__(self):
     return '<Name %r>' % self.name
+
+
 # Registration Form
 class UserProfile(FlaskForm):
     name = StringField("Please Enter your Name", validators=[DataRequired()])
@@ -70,6 +84,21 @@ class LoginForm(FlaskForm):
     password = PasswordField("Please enter your Password", validators=[DataRequired()])
     submit = SubmitField("submit")
 
+
+# Post Form
+class PostForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired()])
+    content = CKEditorField("Content")
+    author = StringField("Author")
+    submit = SubmitField("Submmit")
+
+
+# Colleague Form
+class StudentForm(FlaskForm):
+    username = StringField("Please enter the username", validators=[DataRequired()])
+    submit = SubmitField("submit")
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -78,19 +107,21 @@ def index():
 # Invalid URL
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template("404.html"),404
+    return render_template("404.html"), 404
+
 
 # Internal Server Error
 @app.errorhandler(500)
 def internal_server_error(e):
-    return render_template("500.html"),500
+    return render_template("500.html"), 500
+
 
 # Login Page
-@app.route('/login',methods=['GET','POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user=Users.query.filter_by(username=form.username.data).first()
+        user = Users.query.filter_by(username=form.username.data).first()
         if user:
             if check_password_hash(user.password_hash, form.password.data):
                 login_user(user)
@@ -102,22 +133,99 @@ def login():
             flash("User doesn't exist, please fill the form properly")
     return render_template('login.html', form=form)
 
+
 # Logout function
-@app.route('/logout', methods=['GET','POST'])
+@app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     flash("Logged out Successfully")
     return redirect(url_for('login'))
 
+
 # Dashboard Page
-@app.route('/dashboard', methods=['GET','POST'])
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     return render_template('dashboard.html')
 
+# Add Post Page
+@app.route('/add-post', methods=['GET', 'POST'])
+# To show the page only when user is logged in
+@login_required
+def add_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        poster = current_user.id
+        post = Posts(title=form.title.data, content=form.content.data, author_id=poster)
+        form.title.data = ''
+        form.content.data = ''
+        # Add post to the database
+        db.session.add(post)
+        db.session.commit()
+
+        flash("Post submitted successfully")
+
+    return render_template("add_post.html", form=form)
+
+# Show the Posts Page
+@app.route('/posts')
+def posts():
+    posts = Posts.query.order_by(Posts.date_posted.desc())
+    return render_template('posts.html', posts=posts)
+
+
+# Separate page to view post
+@app.route('/posts/<int:id>')
+def post(id):
+    post = Posts.query.get_or_404(id)
+    return render_template('post.html', post=post)
+
+# Editing Posts
+@app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_posts(id):
+    post = Posts.query.get_or_404(id)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+
+        db.session.add(post)
+        db.session.commit()
+        flash("Post has been updated")
+
+        return redirect(url_for('post', id=post.id))
+    if current_user.id == post.author_id:
+        form.title.data = post.title
+        form.slug.data = post.slug
+        return render_template('edit_posts.html', form=form)
+    else:
+        flash("Access Denied!")
+        posts = Posts.query.order_by(Posts.date_posted)
+        return render_template('posts.html', posts=posts)
+
+
+# Deleting Blog Posts
+@app.route('/posts/delete/<int:id>')
+@login_required
+def delete_post(id):
+    post_to_delete = Posts.query.get_or_404(id)
+    id = current_user.id
+    if id == post_to_delete.poster.id:
+        try:
+            db.session.delete(post_to_delete)
+            db.session.commit()
+            flash("Post Deleted successfully")
+            posts = Posts.query.order_by(Posts.date_posted)
+            return render_template('posts.html', posts=posts)
+        except:
+            flash("There's some problem in deleting the post, Please try again")
+            posts = Posts.query.order_by(Posts.date_posted)
+            return render_template('posts.html', posts=posts)
+
 # Add user Page
-@app.route('/user/add', methods=['GET','POST'])
+@app.route('/user/add', methods=['GET', 'POST'])
 def add_user():
     name = None
     form = UserProfile()
@@ -137,6 +245,21 @@ def add_user():
         flash("User added successfully")
     return render_template('add_user.html', form=form, name=name)
 
+
+# Delete User
+@app.route('/delete/<int:id>')
+def delete(id):
+    user_to_delete = Users.query.get_or_404(id)
+    name = None
+    form = UserProfile()
+    try:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash("!User has been deleted")
+        return render_template('add_user.html', form=form, name=name)
+    except:
+        flash("There's some problem in deleting the user")
+        return render_template('add_user.html', form=form, name=name)
 
 
 if (__name__ == "__main__"):
