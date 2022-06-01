@@ -11,7 +11,8 @@ from datetime import datetime
 import yaml
 
 app = Flask(__name__)
-
+app.config['CKEDITOR_PKG_TYPE'] = 'standard'
+ckeditor = CKEditor(app)
 # Databse initalisation
 data = yaml.full_load(open('data.yaml'))
 app.config['SECRET_KEY'] = data['secret_key']
@@ -90,7 +91,7 @@ class PostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     content = CKEditorField("Content")
     author = StringField("Author")
-    submit = SubmitField("Submmit")
+    submit = SubmitField("Submit")
 
 
 # Colleague Form

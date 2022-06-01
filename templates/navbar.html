@@ -9,6 +9,12 @@
           <!-- TO change the login/logout nav-button when logged in -->
           {% if current_user.is_authenticated %}
           <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{url_for('posts')}}">Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{url_for('add_post')}}">Add Blog Post</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="{{url_for('logout')}}">Logout</a>
           </li>
           <li class="nav-item">
