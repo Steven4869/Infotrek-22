@@ -1,0 +1,2 @@
+database_uri: 'mysql+pymysql://root:password@localhost/databse_name'
+secret_key: 'Your secret key'
