@@ -144,12 +144,17 @@ def logout():
     return redirect(url_for('login'))
 
 
+
 # Dashboard Page
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     return render_template('dashboard.html')
-
+# Add Colleague Page
+@app.route('/add_colleague', methods=['GET', 'POST'])
+@login_required
+def add_colleague():
+    return render_template('add_colleague.html')
 # Add Post Page
 @app.route('/add-post', methods=['GET', 'POST'])
 # To show the page only when user is logged in

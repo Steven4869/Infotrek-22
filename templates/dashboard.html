@@ -14,5 +14,18 @@
 <br>
 <br>
 <h1>Welcome {{ current_user.name }}</h1> <br>
+<div class="shadow p-3 mb-5 bg-bodyrounded">
+  <div class="container">
+    <div class="row">
+      <div class="col-8">
+        <p>Username: {{ current_user.username }} </p> <br>
+        <p>Email: {{ current_user.email }} </p> <br>
+        <a href="{{url_for('logout')}}" class="btn btn-outline-primary btn-sm">Logout</a>
+        <a href="{{url_for('add_colleague')}}" class="btn btn-outline-primary btn-sm">Add Colleague</a>
+      </div>
+    </div>
+  </div>
+</div>
 
+</div>
 {% endblock %}
