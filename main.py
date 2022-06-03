@@ -17,7 +17,7 @@ ckeditor = CKEditor(app)
 data = yaml.full_load(open('data.yaml'))
 app.config['SECRET_KEY'] = data['secret_key']
 # Add Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://izoexrlbzsyoev:37f7613477311d6d1576a6528dca173d76f9b1b1367161a1f6954b854c7bf0bb@ec2-54-165-178-178.compute-1.amazonaws.com:5432/d8ji8clreranq'
+app.config['SQLALCHEMY_DATABASE_URI'] = data['database_uri']
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
