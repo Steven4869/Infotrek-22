@@ -31,7 +31,9 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-
+class Colleague(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), nullable=False, unique=True)
 # Creating Post Model
 class Posts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -96,8 +98,9 @@ class PostForm(FlaskForm):
 
 # Colleague Form
 class StudentForm(FlaskForm):
-    username = StringField("Please enter the username", validators=[DataRequired()])
+    username = StringField("Please enter the Colleague's username", validators=[DataRequired()])
     submit = SubmitField("submit")
+
 
 
 @app.route('/')
@@ -154,7 +157,20 @@ def dashboard():
 @app.route('/add_colleague', methods=['GET', 'POST'])
 @login_required
 def add_colleague():
-    return render_template('add_colleague.html')
+    user=Users.query.order_by(Users.date_added)
+    form=StudentForm()
+    if form.validate_on_submit():
+        colleague_user=Users.query.filter_by(username=form.username.data).first()
+        if colleague_user:
+            colleague=Colleague(username = form.username.data)
+            form.username.data = ''
+            db.session.add(colleague)
+            db.session.commit()
+            flash("User Added successfully")
+        else:
+            flash("Invalid user account")
+    members=Colleague.query.order_by(Colleague.username)
+    return render_template('add_colleague.html', form=form, user=user, members=members)
 # Add Post Page
 @app.route('/add-post', methods=['GET', 'POST'])
 # To show the page only when user is logged in
@@ -177,8 +193,9 @@ def add_post():
 # Show the Posts Page
 @app.route('/posts')
 def posts():
+    members=Colleague.query.order_by(Colleague.username)
     posts = Posts.query.order_by(Posts.date_posted.desc())
-    return render_template('posts.html', posts=posts)
+    return render_template('posts.html', posts=posts, members=members)
 
 
 # Separate page to view post
@@ -204,7 +221,7 @@ def edit_posts(id):
         return redirect(url_for('post', id=post.id))
     if current_user.id == post.author_id:
         form.title.data = post.title
-        form.slug.data = post.slug
+        form.content.data = post.content
         return render_template('edit_posts.html', form=form)
     else:
         flash("Access Denied!")

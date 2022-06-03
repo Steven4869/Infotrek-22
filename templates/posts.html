@@ -3,32 +3,38 @@
 
 {% for messages in get_flashed_messages() %}
 <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-    {{messages}}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-    
-    
-{% endfor %}
+  {{messages}}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 
-<h1>Posts</h1>
+
+{% endfor %}
 <br>
+<h4>Posts</h4>
+<br>
+{% if members.username==current_user.username %}
 {% for post in posts %}
 <div class="shadow p-3 mb-5 bg-bodyrounded">
-        <h1>{{post.title}}</h1> By: {{ post.poster.name }} <br> 
-        {{ post.date_posted }} <br>
-        {{ post.content[0:500]|safe }}... <br>
-        <br>
-        <br>
-        <a href="{{url_for('post', id=post.id)}}" class="btn btn-outline-primary">View</a>
-        {% if post.author_id == current_user.id %}
-          <a href="{{url_for('edit_posts', id=post.id)}}" class="btn btn-outline-secondary ">Edit Post</a>
-        {% endif %}
+  <h1>{{post.title}}</h1> By: {{ post.poster.name }} <br>
+  {{ post.date_posted }} <br>
+  {{ post.content[0:500]|safe }}... <br>
+  <br>
+  <br>
+  <a href="{{url_for('post', id=post.id)}}" class="btn btn-outline-primary">View</a>
+  {% if post.author_id == current_user.id %}
+  <a href="{{url_for('edit_posts', id=post.id)}}" class="btn btn-outline-secondary ">Edit Post</a>
+  {% endif %}
 
-        <hr>
-        <br>
-    </div>
+  <hr>
+  <br>
+</div>
+
 
 
 {% endfor %}
-
+{% else %}
+<div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+  You have to be part fo Colleague first to view this post
+</div>
+{% endif %}
 {% endblock %}

@@ -1,23 +1,54 @@
 {% extends 'base.html' %}
 {% block content %}
-<br>
-<br>
-<br>
-<div>
-    <p>Please Add the Colleague in the list, the colleague mentioned must have an account</p>
+{% for messages in get_flashed_messages() %}
+<div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+    {{messages}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-<div class="container">
-    <div class="row">
-        <div class="col-8">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Please enter the Colleague's username"
-                    aria-label="Colleague's username" aria-describedby="button-addon2">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" type="button" id="button-addon2">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
+{% endfor %}
+<br>
+<br>
+
+<p>Student Profile Available:</p>
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Username</th>
+        </tr>
+    </thead>
+    {% for users in user %}
+    <tbody>
+
+        <th scope="row">{{users.name}}</th>
+        <td>{{users.username}}</td>
+
+    </tbody>
+    {% endfor %}
+</table>
+<br>
+<div class="shadow p-3 mb-5 bg-bodyrounded">
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        {{form.username.label}}
+        {{form.username(class="form-control")}}
+        <br>
+        {{form.submit(class="btn btn-primary")}}
+    </form>
 </div>
+<p>Members Added</p>
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Username</th>
+        </tr>
+    </thead>
+    {% for member in members %}
+    <tbody>
+
+        <th scope="row">{{member.username}}</th>
+    </tbody>
+    {% endfor %}
+</table>
 
 {% endblock %}

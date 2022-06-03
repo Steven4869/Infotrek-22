@@ -95,7 +95,12 @@
                 <h4>A student sharing experince platform, where students from all over the world can share their
                     experince.</h4>
                 <hr>
+                {% if current_user.is_authenticated %}
+                <a href="{{url_for('dashboard')}}" class="btn btn-outline-primary">Let's get Started</a>
+                {% else %}
                 <a href="{{url_for('login')}}" class="btn btn-outline-primary">Let's get Started</a>
+                {% endif %}
+
             </div>
         </div>
     </header>
@@ -113,8 +118,9 @@
                     role="button"><i class="fa fa-twitter"></i></a>
 
                 <!-- Instagram -->
-                <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i
-                        class="fa fa-instagram"></i></a>
+                <a class="btn btn-outline-light btn-floating m-1"
+                    href="https://www.linkedin.com/in/shivam-sinha-978933225/" target="_blank" role="button"><i
+                        class="fa fa-linkedin"></i></a>
             </section>
             <!-- Section: Social media -->
         </div>
