@@ -1,6 +1,8 @@
 # Infotrek-22
 An student experience sharing app where students can share their experience in the form of blog posts
 
+# Check the Demo of the site [here](https://websmith-infotrek22.herokuapp.com/)
+
 # How to get started 
 
 Clone This Project (Make Sure You Have Git Installed)
