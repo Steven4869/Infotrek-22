@@ -171,6 +171,7 @@ def add_colleague():
             flash("Invalid user account")
     members=Colleague.query.order_by(Colleague.username)
     return render_template('add_colleague.html', form=form, user=user, members=members)
+
 # Add Post Page
 @app.route('/add-post', methods=['GET', 'POST'])
 # To show the page only when user is logged in
