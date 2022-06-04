@@ -193,7 +193,7 @@ def add_post():
 # Show the Posts Page
 @app.route('/posts')
 def posts():
-    members=Colleague.query.order_by(Colleague.username)
+    members=Colleague.query.order_by(Colleague.id)
     posts = Posts.query.order_by(Posts.date_posted.desc())
     return render_template('posts.html', posts=posts, members=members)
 
